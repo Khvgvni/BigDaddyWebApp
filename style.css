@@ -134,6 +134,8 @@ input,select,textarea{
   position:fixed; bottom:12px; left:12px; right:12px; display:grid; grid-template-columns:repeat(4,1fr);
   gap:10px; padding:8px; z-index:10
 }
+.tabbar{padding-bottom:calc(6px + env(safe-area-inset-bottom));
+}
 .tab{
   padding:12px 10px; border:1px solid var(--stroke); border-radius:14px; background:#0c0f1499; color:var(--text);
   font-weight:600
@@ -157,4 +159,4 @@ input,select,textarea{
 .admin.hidden{display:none}
 .hidden{display:none !important}
 
-.spacer-80{height:80px}
+.spacer-80{height:calc(92px + env(safe-area-inset-bottom));}
