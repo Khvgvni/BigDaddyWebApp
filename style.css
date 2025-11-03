@@ -167,21 +167,94 @@ input,select,textarea{
   content:""; display:block; height:calc(80px + env(safe-area-inset-bottom));
 }
 
-/* --- сплэш при загрузке --- */
+/* ===================== */
+/*  BEAUTY SPLASH 2.0    */
+/* ===================== */
+
 #splash{
   position:fixed; inset:0; z-index:9999;
-  display:flex; align-items:center; justify-content:center;
-  background:radial-gradient(1000px 700px at 10% -10%, #1a2255 0%, transparent 60%),
-             radial-gradient(900px 900px at 120% 10%, #113a3a 0%, transparent 55%),
-             #0b0c10;
+  display:grid; place-items:center;
+  overflow:hidden;
+  background:#0b0c10;
+  /* лёгкое затемнение, чтобы переход в приложение был плавный */
 }
-#splash img{
-  width:min(140px,28vw); height:auto; opacity:0; transform:scale(.92);
-  animation:splashIn .4s ease forwards, splashOut .6s ease 1.6s forwards;
+
+.s-aurora, .s-ring, .s-logo{position:absolute;}
+
+/* АУРОРЫ — мягкие переливы с параллаксом */
+.s-aurora{
+  inset:-20%;
+  background:
+    radial-gradient(60% 40% at 15% 20%, rgba(93,142,255,.25) 0%, transparent 60%),
+    radial-gradient(55% 45% at 85% 15%, rgba(61,220,151,.20) 0%, transparent 65%),
+    radial-gradient(60% 55% at 60% 90%, rgba(255,107,107,.18) 0%, transparent 70%);
+  filter: blur(32px) saturate(120%);
+  animation: auroraMove 6.5s ease-in-out infinite alternate;
 }
-@keyframes splashIn{to{opacity:1; transform:scale(1)}}
-@keyframes splashOut{to{opacity:0; transform:scale(.98)}}
-body.splash-done #splash{display:none}
+@keyframes auroraMove {
+  0%   { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+  50%  { transform: translate3d(2%, 1%, 0)  scale(1.04); }
+  100% { transform: translate3d(-1%, 2%, 0) scale(1.03); }
+}
+
+/* ТОНКОЕ НЕОНОВОЕ КОЛЬЦО вокруг лого */
+.s-ring{
+  width:min(240px, 58vw);
+  height:min(240px, 58vw);
+  border-radius:50%;
+  background:
+    conic-gradient(from 0deg,
+      rgba(77,163,255,.0) 0deg,
+      rgba(77,163,255,.55) 120deg,
+      rgba(61,220,151,.55) 220deg,
+      rgba(255,107,107,.45) 320deg,
+      rgba(77,163,255,.0) 360deg);
+  mask: radial-gradient(circle, transparent 62%, #000 66%);
+  filter: blur(0.6px);
+  animation: ringSpin 4.8s linear infinite;
+  opacity:.9;
+}
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+
+/* ЛОГО: свечение + пульсация + мягкий вылет */
+.s-logo{
+  display:grid; place-items:center;
+  transform: translateY(6px);
+}
+.s-logo img{
+  width:min(140px, 32vw); height:auto; display:block;
+  opacity:0; transform: scale(.92);
+  filter: drop-shadow(0 4px 18px rgba(77,163,255,.35));
+  animation:
+    logoIn .5s cubic-bezier(.2,.8,.2,1) forwards,
+    logoGlow 2.4s ease-in-out infinite;
+}
+@keyframes logoIn   { to { opacity:1; transform: scale(1); } }
+@keyframes logoGlow {
+  0%,100% { filter: drop-shadow(0 4px 18px rgba(77,163,255,.35)) drop-shadow(0 0 0 rgba(61,220,151,0)); }
+  50%     { filter: drop-shadow(0 6px 26px rgba(77,163,255,.55)) drop-shadow(0 0 22px rgba(61,220,151,.25)); }
+}
+
+/* ГЛАДКИЙ УХОД сплэша */
+body.splash-hide #splash{
+  pointer-events:none;
+  animation: splashFade .6s ease forwards;
+}
+@keyframes splashFade {
+  to { opacity:0; backdrop-filter: blur(2px); }
+}
+
+/* Уменьшаем интенсивность на слабых устройствах */
+@media (max-width:380px){
+  .s-ring{ opacity:.75; }
+  .s-aurora{ filter: blur(28px) saturate(110%); }
+}
+
+/* Доступность: уважаем reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  .s-aurora, .s-ring { animation: none; }
+  .s-logo img { animation: logoIn .35s ease-out forwards; }
+}
 
 /* --- Дата / Время: гарантированный зазор и без переполнения --- */
 .dates-row{
