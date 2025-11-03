@@ -18,10 +18,12 @@
 */
 const BACKEND_URL = 'https://app.bigdaddycafe.ru';// <= ЗАМЕНИТЕ на адрес вашей VM
 
-// Убираем сплэш через ~2 сек. после полной загрузки
+// Splash control: прячем сплэш через 1.6–2.0s, но не тормозим UI
 window.addEventListener('load', () => {
-  setTimeout(() => document.body.classList.add('splash-done'), 2000);
+  const HIDE_AFTER = 1800;  // мс — можешь поставить 1600–2200
+  setTimeout(() => document.body.classList.add('splash-hide'), HIDE_AFTER);
 });
+
 /* ======== ДАННЫЕ ДЛЯ ДЕМО ======== */
 const DISHES = [
   {id:'p1', title:'Маргарита', desc:'Классическая пицца с томатами и моцареллой', price: 550, img:'https://images.unsplash.com/photo-1548365328-9f547fb09530?q=80&w=800&auto=format&fit=crop'},
