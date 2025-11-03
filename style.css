@@ -200,3 +200,22 @@ form {
   display: block;
   height: calc(80px + env(safe-area-inset-bottom));
 }
+
+/* Splash */
+#splash{
+  position:fixed; inset:0; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(1000px 700px at 10% -10%, #1a2255 0%, transparent 60%),
+             radial-gradient(900px 900px at 120% 10%, #113a3a 0%, transparent 55%),
+             #0b0c10;
+}
+#splash img{
+  width:min(140px, 28vw); height:auto;
+  opacity:0; transform:scale(.92);
+  animation: splashIn .4s ease forwards, splashOut .6s ease 1.6s forwards;
+}
+@keyframes splashIn { to {opacity:1; transform:scale(1);} }
+@keyframes splashOut { to {opacity:0; transform:scale(.98);} }
+
+/* когда прячем сплэш */
+body.splash-done #splash{ display:none; }
