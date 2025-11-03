@@ -78,6 +78,8 @@ body{
 /* сетка блюд */
 .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding-top:8px}
 .card{display:flex; flex-direction:column; overflow:hidden; position:relative; min-height:240px}
+.card{ opacity:0; transform: translateY(12px); transition: opacity .4s ease, transform .4s ease; }
+.card._in{ opacity:1; transform: none; }
 .card .img{aspect-ratio:1/1; width:100%; object-fit:cover; border-bottom:1px solid var(--stroke)}
 .card .content{padding:10px; display:flex; flex-direction:column; gap:6px}
 .card h4{margin:0; font-size:14px}
