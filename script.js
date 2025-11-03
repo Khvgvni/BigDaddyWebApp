@@ -100,6 +100,13 @@ function renderMenu(filter='Все', search=''){
   });
 }
 
+// наблюдатель появления карточек
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('_in'); });
+},{ threshold:.12 });
+
+document.querySelectorAll('.card').forEach(el=> io.observe(el));
+
 /* ======== КОРЗИНА ======== */
 function addToCart(id, qty){
   state.cart[id]=(state.cart[id]||0)+qty;
