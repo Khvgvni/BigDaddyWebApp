@@ -271,3 +271,18 @@ body.splash-hide #splash{
 @media (max-width:380px){
   .dates-row{grid-template-columns:1fr; column-gap:0;}
 }
+
+.logo-wrap{position:relative; display:inline-block}
+.logo-wrap .shine{
+  position:absolute; inset:0; pointer-events:none;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.3) 30%, transparent 60%);
+  transform: translateX(-120%) skewX(-12deg);
+  filter: blur(1px);
+  animation: shineRun 4.5s ease-in-out infinite;
+}
+@keyframes shineRun {
+  0%, 70% { transform: translateX(-120%) skewX(-12deg); opacity:.0; }
+  75%     { opacity:.85; }
+  100%    { transform: translateX(120%) skewX(-12deg); opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){ .logo-wrap .shine{ animation:none; } }
