@@ -240,3 +240,26 @@ body.splash-done #splash{ display:none; }
 #reserveForm .dates-row input{
   width:100%; min-width:0; /* предотвращает расползание на iOS */
 }
+
+/* --- правка ширины Дата/Время --- */
+#reserveForm .dates-row{
+  display: grid;                           /* на всякий случай */
+  grid-template-columns: calc(50% - 12px) calc(50% - 12px); /* чуть уже половины */
+  column-gap: 24px;                        /* заметный зазор между полями */
+}
+
+/* чтобы инпуты точно не выпирали из ячейки на iOS */
+#reserveForm .dates-row label{ min-width: 0; }
+#reserveForm .dates-row input{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* на очень узких экранах складываем в столбик */
+@media (max-width: 370px){
+  #reserveForm .dates-row{
+    grid-template-columns: 1fr;
+    column-gap: 0;
+    row-gap: 12px;
+  }
+}
