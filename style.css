@@ -169,3 +169,34 @@ input,select,textarea{
 .hidden{display:none !important}
 
 .spacer-80{height:calc(92px + env(safe-area-inset-bottom));}
+
+/* --- Исправление прокрутки и видимости кнопки --- */
+
+/* общий контейнер страницы корзины */
+#page-cart {
+  overflow-y: auto;              /* даём прокручиваться */
+  -webkit-overflow-scrolling: touch; /* плавная прокрутка на iOS */
+  padding-bottom: calc(120px + env(safe-area-inset-bottom)); /* запас под кнопкой */
+}
+
+/* для всех форм внутри страниц */
+form {
+  overflow: visible;
+}
+
+/* если где-то стоит fixed внизу — учитываем safe area */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 999;
+}
+
+/* небольшая "прослойка" внизу страницы, чтобы всё не упиралось в край */
+.page-content::after {
+  content: "";
+  display: block;
+  height: calc(80px + env(safe-area-inset-bottom));
+}
