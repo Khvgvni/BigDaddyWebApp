@@ -43,7 +43,7 @@ body{
 .titles h1{margin:0; font-size:18px; font-weight:700}
 .subtitle{margin:2px 0 0 0; color:var(--muted); font-size:12px}
 
-.search-wrap{padding:0 12px 8px}
+.search-wrap{ display:none !important; }
 .search-wrap input{
   width:100%; padding:14px 16px; border-radius:14px; border:1px solid var(--stroke);
   background:#0c0f14aa; color:var(--text); outline:none;
@@ -219,3 +219,12 @@ form {
 
 /* когда прячем сплэш */
 body.splash-done #splash{ display:none; }
+
+/* делаем столбцы немного уже, чтобы не «соприкасались» */
+#reserveForm .dates-row{
+  grid-template-columns: calc(50% - 12px) calc(50% - 12px);
+  column-gap: 24px;
+}
+#reserveForm .dates-row input{
+  width:100%; min-width:0; /* предотвращает расползание на iOS */
+}
