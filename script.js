@@ -16,7 +16,7 @@
 Бэкенд формирует красивый текст и шлёт в Telegram chat_id админов.
 
 */
-const BACKEND_URL = 'https://your-vm.example.com'; // <= ЗАМЕНИТЕ на адрес вашей VM
+const BACKEND_URL = 'https://app.bigdaddycafe.ru';// <= ЗАМЕНИТЕ на адрес вашей VM
 
 /* ======== ДАННЫЕ ДЛЯ ДЕМО ======== */
 const DISHES = [
