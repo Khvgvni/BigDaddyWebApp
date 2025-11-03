@@ -18,6 +18,10 @@
 */
 const BACKEND_URL = 'https://app.bigdaddycafe.ru';// <= ЗАМЕНИТЕ на адрес вашей VM
 
+// Убираем сплэш через ~2 сек. после полной загрузки
+window.addEventListener('load', () => {
+  setTimeout(() => document.body.classList.add('splash-done'), 2000);
+});
 /* ======== ДАННЫЕ ДЛЯ ДЕМО ======== */
 const DISHES = [
   {id:'p1', title:'Маргарита', desc:'Классическая пицца с томатами и моцареллой', price: 550, img:'https://images.unsplash.com/photo-1548365328-9f547fb09530?q=80&w=800&auto=format&fit=crop'},
