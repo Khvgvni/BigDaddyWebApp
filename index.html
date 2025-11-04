@@ -4,12 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Café App</title>
-  <link rel="stylesheet" href="style.css?v=9">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0b0c10">
+  <link rel="stylesheet" href="style.css?v=10">
+
+  <!-- Заглушка Telegram WebApp (не тянем telegram.org) -->
+  <script>
+    if (!window.Telegram) window.Telegram = { WebApp: {} };
+    const WA = window.Telegram.WebApp;
+    for (const fn of ["ready","expand","close","enableClosingConfirmation","sendData","BackButton","MainButton","HapticFeedback"]) {
+      if (!WA[fn]) WA[fn] = typeof WA[fn] === "object" ? WA[fn] : (()=>{});
+    }
+    if (!WA.initDataUnsafe) WA.initDataUnsafe = {};
+    if (!WA.platform) WA.platform = "unknown";
+  </script>
 </head>
 <body>
+  <!-- Твоё содержимое страницы -->
+
+  <!-- Скрипт приложения — ПОД заглушкой -->
+  <script src="script.js?v=10"></script>
+</body>
+</html>
 
 <!-- Splash -->
 <div id="splash" aria-hidden="true">
