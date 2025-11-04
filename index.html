@@ -7,22 +7,64 @@
   <meta name="theme-color" content="#0b0c10">
   <link rel="stylesheet" href="style.css?v=10">
 
-  <!-- Заглушка Telegram WebApp (не тянем telegram.org) -->
-  <script>
-    if (!window.Telegram) window.Telegram = { WebApp: {} };
-    const WA = window.Telegram.WebApp;
-    for (const fn of ["ready","expand","close","enableClosingConfirmation","sendData","BackButton","MainButton","HapticFeedback"]) {
-      if (!WA[fn]) WA[fn] = typeof WA[fn] === "object" ? WA[fn] : (()=>{});
-    }
-    if (!WA.initDataUnsafe) WA.initDataUnsafe = {};
-    if (!WA.platform) WA.platform = "unknown";
-  </script>
-</head>
-<body>
-  <!-- Твоё содержимое страницы -->
+ <!-- Telegram WebApp stub for browser (без VPN/без CDN) -->
+<script>
+(function () {
+  if (!window.Telegram) window.Telegram = {};
+  const WA = window.Telegram.WebApp = window.Telegram.WebApp || {};
+  const noop = () => {};
 
-  <!-- Скрипт приложения — ПОД заглушкой -->
-  <script src="script.js?v=10"></script>
+  // базовые поля/методы
+  WA.platform = WA.platform || 'web';
+  WA.colorScheme = WA.colorScheme || 'dark';
+  WA.initDataUnsafe = WA.initDataUnsafe || {};
+  WA.isExpanded = true;
+
+  WA.ready = WA.ready || noop;
+  WA.expand = WA.expand || noop;
+  WA.close = WA.close || noop;
+  WA.enableClosingConfirmation = WA.enableClosingConfirmation || noop;
+  WA.sendData = WA.sendData || noop;
+  WA.onEvent = WA.onEvent || function(){};
+  WA.offEvent = WA.offEvent || function(){};
+
+  // MainButton API (минимально нужное)
+  if (!WA.MainButton) {
+    WA.MainButton = {
+      text: '',
+      isVisible: false,
+      isEnabled: true,
+      setText(t){ this.text = t; },
+      show(){ this.isVisible = true; },
+      hide(){ this.isVisible = false; },
+      enable(){ this.isEnabled = true; },
+      disable(){ this.isEnabled = false; },
+      onClick: noop,
+      offClick: noop,
+    };
+  }
+
+  // BackButton API
+  if (!WA.BackButton) {
+    WA.BackButton = {
+      isVisible: false,
+      show(){ this.isVisible = true; },
+      hide(){ this.isVisible = false; },
+      onClick: noop,
+      offClick: noop,
+    };
+  }
+
+  // Haptics API
+  if (!WA.HapticFeedback) {
+    WA.HapticFeedback = {
+      impactOccurred: noop,
+      notificationOccurred: noop,
+      selectionChanged: noop,
+    };
+  }
+})();
+</script>
 </body>
 
 <!-- Splash -->
