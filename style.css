@@ -48,7 +48,7 @@ body{
 
 /* логотип в шапке (картинка) */
 .logo-img{
-  height:24px; width:100%; display:block; border-radius:8px;
+  height:24px; width:auto; display:block; border-radius:8px;
   box-shadow:0 1px 2px #00000040;
 }
 @media (min-width:420px){ .logo-img{ height:24px; } }
