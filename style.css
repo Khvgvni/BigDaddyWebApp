@@ -286,3 +286,45 @@ body.splash-hide #splash{
   100%    { transform: translateX(120%) skewX(-12deg); opacity:0; }
 }
 @media (prefers-reduced-motion: reduce){ .logo-wrap .shine{ animation:none; } }
+
+/* --- Обновлённая шапка --- */
+.app-header{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.header-center{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Увеличенное лого */
+.logo-big{
+  width: 70px;   /* можно подправить, если нужно чуть больше/меньше */
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+}
+
+/* Надпись под лого */
+.subtitle-large{
+  font-size: 15px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+
+/* Скрываем старое оформление, если где-то осталось */
+.header-left, .titles, .titles h1{
+  display: none !important;
+}
