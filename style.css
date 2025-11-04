@@ -328,3 +328,44 @@ body.splash-hide #splash{
 .header-left, .titles, .titles h1{
   display: none !important;
 }
+
+/* --- Центрированный адаптивный хедер --- */
+.app-header.header-centered {
+  position: relative;
+  z-index: 10;
+  padding: 24px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Центрируем содержимое */
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Ограничение логотипа по размеру */
+.hero-logo {
+  width: min(40vw, 140px);   /* на маленьких экранах 40% ширины, максимум 140px */
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Текст под логотипом */
+.tagline {
+  margin-top: 6px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: clamp(13px, 2.5vw, 16px);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
