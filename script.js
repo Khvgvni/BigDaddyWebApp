@@ -18,10 +18,15 @@
 */
 const BACKEND_URL = 'https://app.bigdaddycafe.ru';// <= ЗАМЕНИТЕ на адрес вашей VM
 
-// Splash control: прячем сплэш через 1.6–2.0s, но не тормозим UI
 window.addEventListener('load', () => {
-  const HIDE_AFTER = 1800;  // мс — можешь поставить 1600–2200
-  setTimeout(() => document.body.classList.add('splash-hide'), HIDE_AFTER);
+  if (window.Telegram && Telegram.WebApp) {
+    const tg = Telegram.WebApp;
+    tg.ready();
+    tg.expand();          // развернуть на всю высоту
+    tg.enableClosingConfirmation(); // предупреждение при закрытии (по желанию)
+    // Пример доступа к пользователю: tg.initDataUnsafe?.user
+    // TODO: здесь можно читать tg.initDataUnsafe и слать на бэкенд для авторизации по Telegram WebApp initData
+  }
 });
 
 /* ======== ДАННЫЕ ДЛЯ ДЕМО ======== */
