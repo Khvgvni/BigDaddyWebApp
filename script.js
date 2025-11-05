@@ -190,6 +190,27 @@ $('#orderForm')?.addEventListener('submit', async (e)=>{
   }
 });
 
+async function safeFetch(url, opts = {}, timeoutMs = 3000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...opts, signal: ctrl.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.warn('API error:', url, e.message || e);
+    return null; // важное: не бросаем дальше
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+// пример вызова
+(async () => {
+  const events = await safeFetch('/api/events');
+  // ...если null — просто показываем пустое состояние, но прелоадер уже скрыт
+})();
+
 /* ======== АФИША ======== */
 async function fetchEvents(){
   try{
