@@ -1,33 +1,26 @@
-/* ======== НАСТРОЙКИ И ИНТЕГРАЦИЯ ========
+/* ======== НАСТРОЙКА БЭКЕНДА ======== */
+const BACKEND_URL = ''; // тот же домен (избегаем CORS/редиректов)
 
-ВАЖНО: На фронтенде мы НЕ используем токен Telegram.
-Ставьте свой прокси-бэкенд (на вашей VM / хостинге), который примет POST
-и отправит сообщение в чат админов через Telegram Bot API.
-
-Пример эндпоинтов бэкенда (рекомендуется):
-  POST {BACKEND_URL}/api/order
-  POST {BACKEND_URL}/api/reservation
-  POST {BACKEND_URL}/api/feedback
-  POST {BACKEND_URL}/api/admin/list   (опц., для админ-панели)
-  POST {BACKEND_URL}/api/event/create (опц.)
-  GET  {BACKEND_URL}/api/events       (список афиши)
-
-Каждый POST содержит JSON с данными заказа/брони/мероприятия.
-Бэкенд формирует красивый текст и шлёт в Telegram chat_id админов.
-
-*/
-const BACKEND_URL = 'https://app.bigdaddycafe.ru';// <= ЗАМЕНИТЕ на адрес вашей VM
-
-window.addEventListener('load', () => {
+/* ======== TELEGRAM WebApp (безопасно) ======== */
+try {
   if (window.Telegram && Telegram.WebApp) {
     const tg = Telegram.WebApp;
     tg.ready();
-    tg.expand();          // развернуть на всю высоту
-    tg.enableClosingConfirmation(); // предупреждение при закрытии (по желанию)
-    // Пример доступа к пользователю: tg.initDataUnsafe?.user
-    // TODO: здесь можно читать tg.initDataUnsafe и слать на бэкенд для авторизации по Telegram WebApp initData
+    tg.expand();
+    // tg.enableClosingConfirmation();
   }
-});
+} catch(e){ console.warn('TG init error:', e); }
+
+/* ======== СПЛЭШ: только логотип, 1.5с ======== */
+(function () {
+  const splash = document.getElementById('splash');
+  const hide = () => splash && splash.classList.add('hide');
+  // снятие по DOM готовности + таймаут 1.5с
+  document.addEventListener('DOMContentLoaded', () => setTimeout(hide, 1500));
+  // страховки
+  window.addEventListener('load', hide);
+  setTimeout(hide, 2000);
+})();
 
 /* ======== ДАННЫЕ ДЛЯ ДЕМО ======== */
 const DISHES = [
@@ -46,30 +39,26 @@ let EVENTS = [
   {id:'e1', title:'Джаз-вечер', date:'2025-11-08', desc:'Живой джаз, welcome-drink'},
   {id:'e2', title:'Квиз-ночь', date:'2025-11-14', desc:'Командная викторина, призы'},
 ];
-
-const DELIVERY_FEE = 0; // если есть платная доставка — укажите сумму
+const DELIVERY_FEE = 0;
 
 /* ======== СОСТОЯНИЕ ======== */
 const state = {
-  cart: /** @type {Record<string, number>} */ (JSON.parse(localStorage.getItem('cart')||'{}')),
-  user: /** @type {{name?:string,phone?:string}|null} */ (JSON.parse(localStorage.getItem('user')||'null')),
+  cart: JSON.parse(localStorage.getItem('cart')||'{}'),
+  user: JSON.parse(localStorage.getItem('user')||'null'),
   admin: false
 };
 
 /* ======== УТИЛИТЫ ======== */
-const $ = (q)=>document.querySelector(q);
+const $  = (q)=>document.querySelector(q);
 const $$ = (q)=>document.querySelectorAll(q);
 const money = (n)=>`${n.toLocaleString('ru-RU')} ₽`;
-function toast(msg){
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2000);
-}
+function toast(msg){ const t=$('#toast'); if(!t) return; t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
 function saveCart(){ localStorage.setItem('cart', JSON.stringify(state.cart)); updateCartBadge(); }
-function setUser(u){ state.user = u; localStorage.setItem('user', JSON.stringify(u)); renderProfile(); }
+function setUser(u){ state.user=u; localStorage.setItem('user', JSON.stringify(u)); renderProfile(); }
 
 /* ======== РЕНДЕР МЕНЮ ======== */
 function renderCategories(){
-  const wrap = $('#categories'); wrap.innerHTML='';
+  const wrap = $('#categories'); if(!wrap) return; wrap.innerHTML='';
   CATEGORIES.forEach((c,i)=>{
     const b=document.createElement('button'); b.className='chip'+(i===0?' active':''); b.textContent=c;
     b.onclick=()=>{ $$('.chip').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderMenu(c); };
@@ -77,7 +66,7 @@ function renderCategories(){
   });
 }
 function renderMenu(filter='Все', search=''){
-  const grid = $('#menuGrid'); grid.innerHTML='';
+  const grid = $('#menuGrid'); if(!grid) return; grid.innerHTML='';
   const q = search.trim().toLowerCase();
   DISHES.filter(d=>{
     const byCat = filter==='Все' || (filter==='Пицца' && d.title.toLowerCase().includes('пиц'))
@@ -91,7 +80,7 @@ function renderMenu(filter='Все', search=''){
   }).forEach(d=>{
     const card=document.createElement('article'); card.className='card blur';
     card.innerHTML=`
-      <img class="img" src="${d.img}" alt="${d.title}">
+      <img class="img" src="${d.img}" alt="${d.title}" loading="lazy">
       <div class="content">
         <h4>${d.title}</h4>
         <p>${d.desc}</p>
@@ -109,14 +98,12 @@ function renderMenu(filter='Все', search=''){
 function addToCart(id, qty){
   state.cart[id]=(state.cart[id]||0)+qty;
   if(state.cart[id]<=0) delete state.cart[id];
-  saveCart();
-  renderCart();
-  toast('Добавлено в корзину');
+  saveCart(); renderCart(); toast('Добавлено в корзину');
 }
 function updateCartBadge(){
   const count = Object.values(state.cart).reduce((a,b)=>a+b,0);
-  const badge = $('#cartBadge');
-  if(count>0){ badge.textContent = String(count); badge.classList.remove('hidden'); } else badge.classList.add('hidden');
+  const badge = $('#cartBadge'); if(!badge) return;
+  if(count>0){ badge.textContent=String(count); badge.classList.remove('hidden'); } else badge.classList.add('hidden');
 }
 function cartItems(){
   return Object.entries(state.cart).map(([id,qty])=>{
@@ -125,7 +112,7 @@ function cartItems(){
   });
 }
 function renderCart(){
-  const list = $('#cartList'), empty = $('#cartEmpty');
+  const list = $('#cartList'), empty = $('#cartEmpty'); if(!list||!empty) return;
   const items = cartItems();
   if(items.length===0){ list.innerHTML=''; empty.classList.remove('hidden'); $('#checkout').style.display='none'; return; }
   empty.classList.add('hidden'); $('#checkout').style.display='';
@@ -133,7 +120,7 @@ function renderCart(){
   items.forEach(it=>{
     const row=document.createElement('div'); row.className='cart-item';
     row.innerHTML=`
-      <img src="${it.img}" alt="${it.title}">
+      <img src="${it.img}" alt="${it.title}" loading="lazy">
       <div class="meta">
         <h5>${it.title}</h5>
         <div class="muted">${money(it.price)} • ${it.desc}</div>
@@ -164,10 +151,7 @@ $('#orderForm')?.addEventListener('submit', async (e)=>{
 
   const payload = {
     type:'order',
-    user: {
-      name: form.get('name') || state.user?.name || '',
-      phone: form.get('phone') || state.user?.phone || ''
-    },
+    user: { name: form.get('name') || state.user?.name || '', phone: form.get('phone') || state.user?.phone || '' },
     address: form.get('address'),
     when: form.get('when'),
     payment: form.get('payment'),
@@ -184,47 +168,22 @@ $('#orderForm')?.addEventListener('submit', async (e)=>{
     toast('Заказ отправлен админам');
     state.cart = {}; saveCart(); renderCart();
     openTab('profile');
-  }catch(err){
-    console.error(err);
-    toast('Ошибка отправки. Проверьте соединение.');
-  }
+  }catch(err){ console.error(err); toast('Ошибка отправки. Проверьте соединение.'); }
 });
-
-async function safeFetch(url, opts = {}, timeoutMs = 3000) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { ...opts, signal: ctrl.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (e) {
-    console.warn('API error:', url, e.message || e);
-    return null; // важное: не бросаем дальше
-  } finally {
-    clearTimeout(t);
-  }
-}
-
-// пример вызова
-(async () => {
-  const events = await safeFetch('/api/events');
-  // ...если null — просто показываем пустое состояние, но прелоадер уже скрыт
-})();
 
 /* ======== АФИША ======== */
 async function fetchEvents(){
   try{
-    const res = await fetch(`${BACKEND_URL}/api/events`, {method:'GET'});
+    const res = await fetch(`/api/events`, {method:'GET'});
     if(res.ok){
       const remote = await res.json();
       if(Array.isArray(remote) && remote.length) EVENTS = remote;
     }
-  }catch{/* молча — используем локальные */}
+  }catch{}
   renderEvents();
 }
 function renderEvents(){
-  const wrap = $('#eventsList'); wrap.innerHTML='';
-  const now = new Date().toISOString().slice(0,10);
+  const wrap = $('#eventsList'); if(!wrap) return; wrap.innerHTML='';
   EVENTS.sort((a,b)=>a.date.localeCompare(b.date));
   EVENTS.forEach(ev=>{
     const dt = new Date(ev.date+'T00:00:00');
@@ -240,10 +199,8 @@ function renderEvents(){
   });
 }
 async function eventSignup(ev){
-  const name = state.user?.name || prompt('Ваше имя:');
-  if(!name) return;
-  const phone = state.user?.phone || prompt('Телефон для связи:');
-  if(!phone) return;
+  const name = state.user?.name || prompt('Ваше имя:'); if(!name) return;
+  const phone = state.user?.phone || prompt('Телефон для связи:'); if(!phone) return;
   try{
     await sendToBackend('/api/feedback', {type:'event_signup', event:ev, user:{name,phone}, createdAt:new Date().toISOString()});
     toast('Заявка отправлена');
@@ -265,81 +222,65 @@ $('#reserveForm')?.addEventListener('submit', async (e)=>{
   };
   try{
     await sendToBackend('/api/reservation', payload);
-    toast('Заявка на бронь отправлена');
-    e.target.reset();
+    toast('Заявка на бронь отправлена'); e.target.reset();
   }catch{ toast('Ошибка отправки'); }
 });
 
-/* ======== ПРОФИЛЬ / АВТОРИЗАЦИЯ ======== */
+/* ======== ПРОФИЛЬ ======== */
 function renderProfile(){
-  $('#profileName').textContent = state.user?.name || 'Гость';
-  $('#profilePhone').textContent = state.user?.phone || 'Не авторизован';
-  $('#loginBtn').textContent = state.user ? 'Изменить' : 'Войти';
+  $('#profileName') && ($('#profileName').textContent = state.user?.name || 'Гость');
+  $('#profilePhone') && ($('#profilePhone').textContent = state.user?.phone || 'Не авторизован');
+  $('#loginBtn') && ($('#loginBtn').textContent = state.user ? 'Изменить' : 'Войти');
 }
 $('#loginBtn')?.addEventListener('click', ()=>{
-  const dlg = $('#authDialog');
-  const form = $('#authForm');
-  form.name.value = state.user?.name || '';
-  form.phone.value = state.user?.phone || '';
-  dlg.showModal();
-  form.addEventListener('close', ()=>dlg.close(), {once:true});
+  const dlg = $('#authDialog'), form = $('#authForm'); if(!dlg||!form) return;
+  form.name.value = state.user?.name || ''; form.phone.value = state.user?.phone || '';
+  dlg.showModal(); form.addEventListener('close', ()=>dlg.close(), {once:true});
 });
 $('#authForm')?.addEventListener('submit', (e)=>{
   e.preventDefault();
   const f = new FormData(e.target);
   setUser({name:f.get('name'), phone:f.get('phone')});
-  $('#authDialog').close();
-  toast('Профиль сохранён');
+  $('#authDialog')?.close(); toast('Профиль сохранён');
 });
 
-/* ======== АДМИН-ПАНЕЛЬ (локальный просмотр + хук на бэкенд) ======== */
+/* ======== АДМИН ======== */
 $('#enterAdminBtn')?.addEventListener('click', async ()=>{
-  const pin = $('#adminPin').value.trim();
+  const pin = $('#adminPin')?.value?.trim();
   try{
-    const res = await fetch(`${BACKEND_URL}/api/admin/login`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pin})});
+    const res = await fetch(`/api/admin/login`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pin})});
     if(res.ok){
-      state.admin = true; $('#adminPanel').classList.remove('hidden'); $('#adminGate').classList.add('hidden');
-      loadAdminData();
-      toast('Админ-режим активирован');
-    }else{
-      throw new Error('bad pin');
-    }
+      state.admin = true; $('#adminPanel')?.classList.remove('hidden'); $('#adminGate')?.classList.add('hidden');
+      loadAdminData(); toast('Админ-режим активирован');
+    }else{ throw new Error('bad pin'); }
   }catch{ toast('Неверный пин или нет связи'); }
 });
 $('#exitAdminBtn')?.addEventListener('click', ()=>{
-  state.admin=false; $('#adminPanel').classList.add('hidden'); $('#adminGate').classList.remove('hidden');
+  state.admin=false; $('#adminPanel')?.classList.add('hidden'); $('#adminGate')?.classList.remove('hidden');
 });
-
 $$('[data-admin-tab]').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     $$('[data-admin-tab]').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     const tab = btn.getAttribute('data-admin-tab');
-    $('#adminOrders').classList.toggle('hidden', tab!=='orders');
-    $('#adminReservations').classList.toggle('hidden', tab!=='reservations');
-    $('#adminEvents').classList.toggle('hidden', tab!=='events');
+    $('#adminOrders')?.classList.toggle('hidden', tab!=='orders');
+    $('#adminReservations')?.classList.toggle('hidden', tab!=='reservations');
+    $('#adminEvents')?.classList.toggle('hidden', tab!=='events');
   });
 });
-
 async function loadAdminData(){
   try{
-    const res = await fetch(`${BACKEND_URL}/api/admin/list`, {method:'POST'});
+    const res = await fetch(`/api/admin/list`, {method:'POST'});
     if(!res.ok) throw new Error();
     const data = await res.json();
-    renderAdminOrders(data.orders||[]);
-    renderAdminReservations(data.reservations||[]);
-    // события админом
-    $('#adminEventsList').innerHTML='';
-    (data.events||EVENTS).forEach(addEventAdminCard);
+    renderAdminOrders(data.orders||[]); renderAdminReservations(data.reservations||[]);
+    $('#adminEventsList').innerHTML=''; (data.events||EVENTS).forEach(addEventAdminCard);
   }catch{
-    // fallback: локально пусто
-    renderAdminOrders([]);
-    renderAdminReservations([]);
-    $('#adminEventsList').innerHTML='Нет данных';
+    renderAdminOrders([]); renderAdminReservations([]); $('#adminEventsList').innerHTML='Нет данных';
   }
 }
 function renderAdminOrders(list){
-  const box = $('#adminOrders'); box.innerHTML='';
+  const box = $('#adminOrders'); if(!box){return;} box.innerHTML='';
   if(!list.length){ box.innerHTML='<p class="muted">Нет заказов</p>'; return; }
   list.forEach(o=>{
     const el=document.createElement('div'); el.className='event';
@@ -354,7 +295,7 @@ function renderAdminOrders(list){
   });
 }
 function renderAdminReservations(list){
-  const box = $('#adminReservations'); box.innerHTML='';
+  const box = $('#adminReservations'); if(!box){return;} box.innerHTML='';
   if(!list.length){ box.innerHTML='<p class="muted">Нет заявок</p>'; return; }
   list.forEach(r=>{
     const el=document.createElement('div'); el.className='event';
@@ -365,20 +306,16 @@ function renderAdminReservations(list){
     box.appendChild(el);
   });
 }
-
 $('#createEventForm')?.addEventListener('submit', async (e)=>{
   e.preventDefault();
   const f = new FormData(e.target);
   const ev = {title:f.get('title'), date:f.get('date'), desc:f.get('desc')};
   addEventAdminCard(ev);
-  try{
-    await sendToBackend('/api/event/create', {type:'event', ...ev});
-    toast('Событие отправлено на сервер');
-  }catch{/* no-op */}
+  try{ await sendToBackend('/api/event/create', {type:'event', ...ev}); toast('Событие отправлено на сервер'); }catch{}
   e.target.reset();
 });
 function addEventAdminCard(ev){
-  const wrap = $('#adminEventsList');
+  const wrap = $('#adminEventsList'); if(!wrap) return;
   const el=document.createElement('div'); el.className='event';
   const d = new Date(ev.date); const dd = String(d.getDate()).padStart(2,'0');
   const m = d.toLocaleString('ru-RU',{month:'short'}).replace('.','');
@@ -389,20 +326,18 @@ function addEventAdminCard(ev){
 }
 
 /* ======== ПОИСК ======== */
-$('#searchInput')?.addEventListener('input', (e)=>{
-  renderMenu(getActiveCategory(), e.target.value);
-});
+$('#searchInput')?.addEventListener('input', (e)=>{ renderMenu(getActiveCategory(), e.target.value); });
 function getActiveCategory(){
   const active = Array.from($$('.chips .chip')).find(c=>c.classList.contains('active'));
   return active ? active.textContent : 'Все';
 }
 
-/* ======== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ======== */
+/* ======== ТАБЫ ======== */
 function openTab(name){
   $$('.page').forEach(p=>p.classList.remove('active'));
-  $(`#page-${name}`).classList.add('active');
+  $(`#page-${name}`)?.classList.add('active');
   $$('.tab').forEach(t=>t.classList.remove('active'));
-  $(`#tab-${name}`).classList.add('active');
+  $(`#tab-${name}`)?.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 $$('.tab').forEach(b=>b.addEventListener('click', ()=>openTab(b.dataset.open)));
@@ -410,7 +345,7 @@ $$('[data-open="menu"]')?.forEach?.((b)=>b.addEventListener('click', ()=>openTab
 
 /* ======== СЕТЕВЫЕ ЗАПРОСЫ ======== */
 async function sendToBackend(path, body){
-  const res = await fetch(`${BACKEND_URL}${path}`, {
+  const res = await fetch(`${path}`, { // тот же домен
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify(body)
@@ -419,19 +354,10 @@ async function sendToBackend(path, body){
   return res.json().catch(()=> ({}));
 }
 
-/* ======== ИНИЦИАЛИЗАЦИЯ ======== */
+/* ======== ИНИТ ======== */
 function init(){
-  renderCategories();
-  renderMenu();
-  renderCart();
-  renderProfile();
-  fetchEvents();
-  updateCartBadge();
-
-  // Автоподстановка профиля в форму заказа
-  if(state.user){
-    const form = $('#orderForm');
-    if(form){ form.name.value = state.user.name || ''; form.phone.value = state.user.phone || ''; }
-  }
+  renderCategories(); renderMenu(); renderCart(); renderProfile(); fetchEvents(); updateCartBadge();
+  if(state.user){ const form = $('#orderForm'); if(form){ form.name.value = state.user.name || ''; form.phone.value = state.user.phone || ''; } }
 }
-init();
+document.addEventListener('DOMContentLoaded', init);
+JS
