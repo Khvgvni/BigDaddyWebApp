@@ -1,273 +1,227 @@
-.<!doctype html>
+<!doctype html>
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Café App</title>
+  <title>Big Daddy Café</title>
   <meta name="theme-color" content="#0b0c10">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="/style.css?v=13">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    /* Мини-правки для сплэша: только логотип, 1.5s */
+    #splash{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background:#0b0c10; z-index:9999; transition:opacity .25s ease;
+    }
+    #splash.hide{opacity:0; pointer-events:none;}
+    #splash .s-logo img{width:132px; height:132px; object-fit:contain; animation:pop 1.5s ease forwards;}
+    @keyframes pop {
+      0% { transform:scale(.8); filter:blur(4px); opacity:.0; }
+      30%{ transform:scale(1.04); filter:blur(0); opacity:1; }
+      100%{ transform:scale(1); }
+    }
+  </style>
 
- <!-- Telegram WebApp stub for browser (без VPN/без CDN) -->
-<script>
-(function () {
-  if (!window.Telegram) window.Telegram = {};
-  const WA = window.Telegram.WebApp = window.Telegram.WebApp || {};
-  const noop = () => {};
+  <!-- Лёгкий WebApp-стаб для браузера (не мешает в Telegram) -->
+  <script>
+  (function () {
+    if (!window.Telegram) window.Telegram = {};
+    const WA = window.Telegram.WebApp = window.Telegram.WebApp || {};
+    const noop = () => {};
+    WA.platform = WA.platform || 'web';
+    WA.colorScheme = WA.colorScheme || 'dark';
+    WA.initDataUnsafe = WA.initDataUnsafe || {};
+    WA.ready = WA.ready || noop;
+    WA.expand = WA.expand || noop;
+    WA.close = WA.close || noop;
+    WA.enableClosingConfirmation = WA.enableClosingConfirmation || noop;
+    WA.sendData = WA.sendData || noop;
+    WA.onEvent = WA.onEvent || function(){};
+    WA.offEvent = WA.offEvent || function(){};
+    WA.MainButton = WA.MainButton || {text:'',isVisible:false,isEnabled:true,setText:noop,show:noop,hide:noop,enable:noop,disable:noop,onClick:noop,offClick:noop};
+    WA.BackButton = WA.BackButton || {isVisible:false,show:noop,hide:noop,onClick:noop,offClick:noop};
+    WA.HapticFeedback = WA.HapticFeedback || {impactOccurred:noop,notificationOccurred:noop,selectionChanged:noop};
+  })();
+  </script>
+</head>
 
-  // базовые поля/методы
-  WA.platform = WA.platform || 'web';
-  WA.colorScheme = WA.colorScheme || 'dark';
-  WA.initDataUnsafe = WA.initDataUnsafe || {};
-  WA.isExpanded = true;
+<body>
 
-  WA.ready = WA.ready || noop;
-  WA.expand = WA.expand || noop;
-  WA.close = WA.close || noop;
-  WA.enableClosingConfirmation = WA.enableClosingConfirmation || noop;
-  WA.sendData = WA.sendData || noop;
-  WA.onEvent = WA.onEvent || function(){};
-  WA.offEvent = WA.offEvent || function(){};
-
-  // MainButton API (минимально нужное)
-  if (!WA.MainButton) {
-    WA.MainButton = {
-      text: '',
-      isVisible: false,
-      isEnabled: true,
-      setText(t){ this.text = t; },
-      show(){ this.isVisible = true; },
-      hide(){ this.isVisible = false; },
-      enable(){ this.isEnabled = true; },
-      disable(){ this.isEnabled = false; },
-      onClick: noop,
-      offClick: noop,
-    };
-  }
-
-  // BackButton API
-  if (!WA.BackButton) {
-    WA.BackButton = {
-      isVisible: false,
-      show(){ this.isVisible = true; },
-      hide(){ this.isVisible = false; },
-      onClick: noop,
-      offClick: noop,
-    };
-  }
-
-  // Haptics API
-  if (!WA.HapticFeedback) {
-    WA.HapticFeedback = {
-      impactOccurred: noop,
-      notificationOccurred: noop,
-      selectionChanged: noop,
-    };
-  }
-})();
-</script>
-</body>
-
-<!-- Splash -->
+<!-- Splash (только логотип) -->
 <div id="splash" aria-hidden="true">
-  <div class="s-aurora"></div>       <!-- живой фон -->
-  <div class="s-ring"></div>         <!-- тонкое кольцо -->
-  <div class="s-logo">
-    <img src="logo.png" alt="Big Daddy Cafe">
-  </div>
+  <div class="s-logo"><img src="/logo.png" alt="Big Daddy Cafe"></div>
 </div>
 
-  <!-- Toast -->
-  <div id="toast" class="toast"></div>
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
 <!-- Header -->
 <header class="app-header blur header-centered">
   <div class="header-center">
-    <img src="logo.png" alt="Big Daddy Cafe" class="hero-logo">
+    <img src="/logo.png" alt="Big Daddy Cafe" class="hero-logo">
     <p class="tagline">Доставка • Бронирование • Афиши</p>
   </div>
 </header>
 
-  <!-- Pages -->
-  <main id="pages">
+<!-- Pages -->
+<main id="pages">
 
-    <!-- MENU PAGE -->
-    <section id="page-menu" class="page active" aria-labelledby="tab-menu">
-      <div id="categories" class="chips"></div>
-      <div id="menuGrid" class="grid"></div>
-      <div class="spacer-80"></div>
-    </section>
+  <!-- MENU PAGE -->
+  <section id="page-menu" class="page active" aria-labelledby="tab-menu">
+    <div id="categories" class="chips"></div>
+    <div id="menuGrid" class="grid"></div>
+    <div class="spacer-80"></div>
+  </section>
 
-    <!-- CART PAGE -->
-    <section id="page-cart" class="page" aria-labelledby="tab-cart">
-      <div id="cartEmpty" class="empty-state">
-        <div class="emoji">🧺</div>
-        <h3>Корзина пуста</h3>
-        <p>Добавьте блюда из меню</p>
-        <button class="btn glass" data-open="menu">К меню</button>
-      </div>
-
-      <div id="cartList" class="cart-list"></div>
-
-      <div id="checkout" class="sheet blur">
-        <h3>Доставка</h3>
-        <form id="orderForm" autocomplete="on">
-          <div class="row">
-            <label>Имя
-              <input name="name" required placeholder="Иван" />
-            </label>
-            <label>Телефон
-              <input name="phone" required inputmode="tel" placeholder="+7 ___ ___-__-__" />
-            </label>
-          </div>
-          <label>Адрес доставки
-            <input name="address" required placeholder="Город, улица, дом, подъезд, код" />
-          </label>
-          <div class="row">
-            <label>Когда
-              <select name="when">
-                <option value="asap">Как можно скорее</option>
-                <option value="30">Через ~30 минут</option>
-                <option value="60">Через ~1 час</option>
-                <option value="custom">Укажу время в комментарии</option>
-              </select>
-            </label>
-            <label>Оплата
-              <select name="payment">
-                <option>Картой курьеру</option>
-                <option>Наличными</option>
-                <option>Онлайн (ссылка)</option>
-              </select>
-            </label>
-          </div>
-          <label>Комментарий к заказу
-            <textarea name="comment" rows="2" placeholder="Без лука, позвонить при подъезде…"></textarea>
-          </label>
-
-          <div class="summary">
-            <div class="line"><span>Сумма</span><span id="sumSubtotal">0 ₽</span></div>
-            <div class="line"><span>Доставка</span><span id="sumDelivery">бесплатно</span></div>
-            <div class="line total"><span>Итого</span><span id="sumTotal">0 ₽</span></div>
-          </div>
-
-          <button id="placeOrderBtn" class="btn primary">Оформить заказ</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- EVENTS PAGE -->
-    <section id="page-events" class="page" aria-labelledby="tab-events">
-      <div class="section-head">
-        <h2>Афиша</h2>
-        <p class="muted">Концерты, квизы, дегустации</p>
-      </div>
-      <div id="eventsList" class="events"></div>
-      <div class="spacer-80"></div>
-    </section>
-
-    <!-- PROFILE PAGE -->
-    <section id="page-profile" class="page" aria-labelledby="tab-profile">
-      <div class="profile-card blur">
-        <div class="avatar">👤</div>
-        <div class="info">
-          <h3 id="profileName">Гость</h3>
-          <p id="profilePhone" class="muted">Не авторизован</p>
+  <!-- CART PAGE -->
+  <section id="page-cart" class="page" aria-labelledby="tab-cart">
+    <div id="cartEmpty" class="empty-state">
+      <div class="emoji">🧺</div>
+      <h3>Корзина пуста</h3>
+      <p>Добавьте блюда из меню</p>
+      <button class="btn glass" data-open="menu">К меню</button>
+    </div>
+    <div id="cartList" class="cart-list"></div>
+    <div id="checkout" class="sheet blur">
+      <h3>Доставка</h3>
+      <form id="orderForm" autocomplete="on">
+        <div class="row">
+          <label>Имя <input name="name" required placeholder="Иван" /></label>
+          <label>Телефон <input name="phone" required inputmode="tel" placeholder="+7 ___ ___-__-__" /></label>
         </div>
-        <button id="loginBtn" class="btn glass small">Войти</button>
-      </div>
-
-      <div class="sheet blur">
-        <h3>Бронирование столика</h3>
-<form id="reserveForm">
-  <div class="row">
-    <label>Дата
-      <input type="date" id="resDate" name="date" required>
-    </label>
-    <label>Время
-      <input type="time" id="resTime" name="time" required>
-    </label>
-  </div>
-          <div class="row dates-row">
-            <label>Гостей
-              <input name="guests" type="number" min="1" max="20" value="2" required />
-            </label>
-            <label>Имя
-              <input name="name" required placeholder="Имя" />
-            </label>
-          </div>
-          <label>Телефон
-            <input name="phone" required inputmode="tel" placeholder="+7 ___ ___-__-__" />
+        <label>Адрес доставки <input name="address" required placeholder="Город, улица, дом, подъезд, код" /></label>
+        <div class="row">
+          <label>Когда
+            <select name="when">
+              <option value="asap">Как можно скорее</option>
+              <option value="30">Через ~30 минут</option>
+              <option value="60">Через ~1 час</option>
+              <option value="custom">Укажу время в комментарии</option>
+            </select>
           </label>
-          <label>Пожелания
-            <textarea name="comment" rows="2" placeholder="У окна, детский стул…"></textarea>
+          <label>Оплата
+            <select name="payment">
+              <option>Картой курьеру</option>
+              <option>Наличными</option>
+              <option>Онлайн (ссылка)</option>
+            </select>
           </label>
-          <button class="btn primary" id="reserveBtn">Забронировать</button>
-        </form>
-      </div>
-
-      <div class="sheet blur" id="adminGate">
-        <h3>Админ-панель</h3>
-        <p class="muted">Доступ только для администраторов</p>
-        <label>Пин-код
-          <input id="adminPin" type="password" inputmode="numeric" placeholder="••••" />
+        </div>
+        <label>Комментарий к заказу
+          <textarea name="comment" rows="2" placeholder="Без лука, позвонить при подъезде…"></textarea>
         </label>
-        <button id="enterAdminBtn" class="btn glass">Войти в режим админа</button>
+
+        <div class="summary">
+          <div class="line"><span>Сумма</span><span id="sumSubtotal">0 ₽</span></div>
+          <div class="line"><span>Доставка</span><span id="sumDelivery">бесплатно</span></div>
+          <div class="line total"><span>Итого</span><span id="sumTotal">0 ₽</span></div>
+        </div>
+
+        <button id="placeOrderBtn" class="btn primary">Оформить заказ</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- EVENTS PAGE -->
+  <section id="page-events" class="page" aria-labelledby="tab-events">
+    <div class="section-head">
+      <h2>Афиша</h2>
+      <p class="muted">Концерты, квизы, дегустации</p>
+    </div>
+    <div id="eventsList" class="events"></div>
+    <div class="spacer-80"></div>
+  </section>
+
+  <!-- PROFILE PAGE -->
+  <section id="page-profile" class="page" aria-labelledby="tab-profile">
+    <div class="profile-card blur">
+      <div class="avatar">👤</div>
+      <div class="info">
+        <h3 id="profileName">Гость</h3>
+        <p id="profilePhone" class="muted">Не авторизован</p>
+      </div>
+      <button id="loginBtn" class="btn glass small">Войти</button>
+    </div>
+
+    <div class="sheet blur">
+      <h3>Бронирование столика</h3>
+      <form id="reserveForm">
+        <div class="row">
+          <label>Дата <input type="date" id="resDate" name="date" required></label>
+          <label>Время <input type="time" id="resTime" name="time" required></label>
+        </div>
+        <div class="row dates-row">
+          <label>Гостей <input name="guests" type="number" min="1" max="20" value="2" required /></label>
+          <label>Имя <input name="name" required placeholder="Имя" /></label>
+        </div>
+        <label>Телефон <input name="phone" required inputmode="tel" placeholder="+7 ___ ___-__-__" /></label>
+        <label>Пожелания <textarea name="comment" rows="2" placeholder="У окна, детский стул…"></textarea></label>
+        <button class="btn primary" id="reserveBtn">Забронировать</button>
+      </form>
+    </div>
+
+    <div class="sheet blur" id="adminGate">
+      <h3>Админ-панель</h3>
+      <p class="muted">Доступ только для администраторов</p>
+      <label>Пин-код <input id="adminPin" type="password" inputmode="numeric" placeholder="••••" /></label>
+      <button id="enterAdminBtn" class="btn glass">Войти в режим админа</button>
+    </div>
+
+    <div class="sheet blur admin hidden" id="adminPanel">
+      <div class="admin-head">
+        <h3>Панель администратора</h3>
+        <button id="exitAdminBtn" class="btn glass small">Выйти</button>
       </div>
 
-      <div class="sheet blur admin hidden" id="adminPanel">
-        <div class="admin-head">
-          <h3>Панель администратора</h3>
-          <button id="exitAdminBtn" class="btn glass small">Выйти</button>
-        </div>
-
-        <div class="tabs small">
-          <button class="tab small active" data-admin-tab="orders">Заказы</button>
-          <button class="tab small" data-admin-tab="reservations">Бронирования</button>
-          <button class="tab small" data-admin-tab="events">Мероприятия</button>
-        </div>
-
-        <div id="adminOrders" class="admin-section"></div>
-        <div id="adminReservations" class="admin-section hidden"></div>
-
-        <div id="adminEvents" class="admin-section hidden">
-          <form id="createEventForm" class="admin-form">
-            <div class="row">
-              <label>Название <input name="title" required /></label>
-              <label>Дата <input name="date" type="date" required /></label>
-            </div>
-            <label>Описание <textarea name="desc" rows="2"></textarea></label>
-            <button class="btn glass small">Добавить событие</button>
-          </form>
-          <div id="adminEventsList" class="events admin"></div>
-        </div>
+      <div class="tabs small">
+        <button class="tab small active" data-admin-tab="orders">Заказы</button>
+        <button class="tab small" data-admin-tab="reservations">Бронирования</button>
+        <button class="tab small" data-admin-tab="events">Мероприятия</button>
       </div>
 
-      <div class="spacer-80"></div>
-    </section>
+      <div id="adminOrders" class="admin-section"></div>
+      <div id="adminReservations" class="admin-section hidden"></div>
 
-  </main>
+      <div id="adminEvents" class="admin-section hidden">
+        <form id="createEventForm" class="admin-form">
+          <div class="row">
+            <label>Название <input name="title" required /></label>
+            <label>Дата <input name="date" type="date" required /></label>
+          </div>
+          <label>Описание <textarea name="desc" rows="2"></textarea></label>
+          <button class="btn glass small">Добавить событие</button>
+        </form>
+        <div id="adminEventsList" class="events admin"></div>
+      </div>
+    </div>
 
-  <!-- Bottom nav -->
-  <nav class="tabbar blur">
-    <button id="tab-menu" class="tab active" data-open="menu">Меню</button>
-    <button id="tab-cart" class="tab" data-open="cart">Корзина<span id="cartBadge" class="badge hidden">0</span></button>
-    <button id="tab-events" class="tab" data-open="events">Афиша</button>
-    <button id="tab-profile" class="tab" data-open="profile">Профиль</button>
-  </nav>
+    <div class="spacer-80"></div>
+  </section>
 
-  <!-- Modals -->
-  <dialog id="authDialog" class="modal blur">
-    <form method="dialog" id="authForm" class="auth">
-      <h3>Вход / Регистрация</h3>
-      <label>Имя <input name="name" required placeholder="Ваше имя" /></label>
-      <label>Телефон <input name="phone" required inputmode="tel" placeholder="+7 ___ ___-__-__" /></label>
-      <menu>
-        <button value="cancel" class="btn glass">Отмена</button>
-        <button value="ok" class="btn primary">Сохранить</button>
-      </menu>
-    </form>
-  </dialog>
+</main>
 
-  
-<script src="/script.js?v=11" defer></script>
+<!-- Bottom nav -->
+<nav class="tabbar blur">
+  <button id="tab-menu" class="tab active" data-open="menu">Меню</button>
+  <button id="tab-cart" class="tab" data-open="cart">Корзина<span id="cartBadge" class="badge hidden">0</span></button>
+  <button id="tab-events" class="tab" data-open="events">Афиша</button>
+  <button id="tab-profile" class="tab" data-open="profile">Профиль</button>
+</nav>
+
+<!-- Modals -->
+<dialog id="authDialog" class="modal blur">
+  <form method="dialog" id="authForm" class="auth">
+    <h3>Вход / Регистрация</h3>
+    <label>Имя <input name="name" required placeholder="Ваше имя" /></label>
+    <label>Телефон <input name="phone" required inputmode="tel" placeholder="+7 ___ ___-__-__" /></label>
+    <menu>
+      <button value="cancel" class="btn glass">Отмена</button>
+      <button value="ok" class="btn primary">Сохранить</button>
+    </menu>
+  </form>
+</dialog>
+
+<script src="/script.js?v=13" defer></script>
 </body>
 </html>
+HTML
